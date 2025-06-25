@@ -1,26 +1,126 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-dark-bg text-dark-text;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cabin', sans-serif;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-dark-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-dark-element rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-dark-border;
+}
+
+/* Custom focus styles */
+*:focus {
+  @apply outline-none ring-2 ring-primary-purple ring-opacity-50;
+}
+
+/* Custom slider styling */
+input[type="range"] {
+  @apply appearance-none bg-dark-element h-2 rounded-lg;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 rounded-full bg-primary-purple cursor-pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  @apply w-4 h-4 rounded-full bg-primary-purple cursor-pointer border-none;
+}
+
+/* Custom transitions */
+.transition-all {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Dark theme badge colors */
+.badge-beginner {
+  @apply bg-secondary-green text-dark-text;
+}
+
+.badge-intermediate {
+  @apply bg-secondary-orange text-dark-text;
+}
+
+.badge-advanced {
+  @apply bg-badge-red text-dark-text;
+}
+
+/* Custom animation for loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Custom tooltip styles */
+.tooltip {
+  @apply relative inline-block;
+}
+
+.tooltip .tooltip-text {
+  @apply invisible absolute z-10 p-2 text-xs rounded-md bg-dark-element text-dark-text;
+  width: 120px;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -60px;
+  margin-bottom: 5px;
+}
+
+.tooltip:hover .tooltip-text {
+  @apply visible;
+}
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-md transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-primary-purple text-dark-text hover:bg-accent-pink;
+}
+
+.btn-secondary {
+  @apply bg-primary-blue text-dark-text hover:bg-primary-purple;
+}
+
+.btn-success {
+  @apply bg-secondary-green text-dark-text hover:scale-105;
+}
+
+.btn-warning {
+  @apply bg-secondary-orange text-dark-text hover:bg-accent-yellow;
 }
