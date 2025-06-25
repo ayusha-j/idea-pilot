@@ -41,7 +41,7 @@ export async function sendMentorMessage(
   userId?: string,
   projectId?: string
 ): Promise<{ chatResponse: ChatResponse; userId: string; projectId: string }> {
-  const response = await fetch(`${API_URL}/mentor-chat`, {
+  const response = await fetch(`${API_URL}/api/mentor-chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -110,3 +110,27 @@ export async function clearChatHistory(
 
   return await response.json();
 }
+
+// src/lib/api.ts (add this function if you have an API service file)
+
+export const regenerateProject = async (): Promise<unknown> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/regenerate-project`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Includes cookies for session handling
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to regenerate project');
+    }
+
+    return await response.json();
+  } catch (error: unknown) {
+    console.error('Error regenerating project:', error);
+    throw error;
+  }
+};

@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ChatMessage, ProjectDetails } from '@/types/project';
+//import { ChatMessage, ProjectDetails } from '@/types/project';
 
 interface ChatContextProps {
   userId: string | null;

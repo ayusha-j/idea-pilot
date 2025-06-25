@@ -85,10 +85,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase: SupabaseClient<Database> = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Authentication Functions
-export const signUp = async (email: string, password: string): Promise<AuthResponse> => {
+export const signUp = async (email: string, password: string, fullName?: string): Promise<AuthResponse> => {
+  // Adding fullName parameter for better user profiles
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        full_name: fullName || email.split('@')[0], // Default to username from email if no full name
+      }
+    }
   });
   
   return { data, error };

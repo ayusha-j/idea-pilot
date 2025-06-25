@@ -1,4 +1,7 @@
-import { useState } from 'react';
+// src/components/ProjectCard.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
 
 // Add type declaration for window.confetti
 declare global {
@@ -7,7 +10,7 @@ declare global {
       particleCount: number;
       spread: number;
       origin: { y: number };
-      [key: string]: any;
+      [key: string]: unknown;
     }) => void;
   }
 }
@@ -44,17 +47,37 @@ interface Project {
   resourcePack: ResourcePack;
 }
 
+interface ChatResponse {
+  message: string;
+  followUpQuestions: string[];
+  resourceLink: string;
+}
+
 // Define props for the component
 interface ProjectCardProps {
   project: Project;
+  chatResponse?: ChatResponse; // Make this optional
   onRefresh: () => void;
   onSave: () => void;
 }
 
-export default function ProjectCard({ project, onRefresh, onSave }: ProjectCardProps) {
+export default function ProjectCard({ project, chatResponse, onRefresh, onSave }: ProjectCardProps) {
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null);
   const [completedMilestones, setCompletedMilestones] = useState<number[]>([]);
   const [codeSnippetVisible, setCodeSnippetVisible] = useState<number | null>(null);
+  
+  // Load saved milestone completion state from localStorage
+  useEffect(() => {
+    const savedCompletions: number[] = [];
+    project.milestones.forEach((_, index) => {
+      if (localStorage.getItem(`milestone_${project.title}_${index}`) === 'completed') {
+        savedCompletions.push(index);
+      }
+    });
+    if (savedCompletions.length > 0) {
+      setCompletedMilestones(savedCompletions);
+    }
+  }, [project]);
   
   // Toggle milestone expansion
   const toggleMilestone = (index: number): void => {
@@ -71,11 +94,13 @@ export default function ProjectCard({ project, onRefresh, onSave }: ProjectCardP
       localStorage.setItem(`milestone_${project.title}_${index}`, 'completed');
       
       // Trigger confetti
-      window.confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+      if (typeof window !== 'undefined' && window.confetti) {
+        window.confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
     }
   };
   
@@ -96,8 +121,13 @@ export default function ProjectCard({ project, onRefresh, onSave }: ProjectCardP
   
   // Copy code to clipboard
   const copyToClipboard = (code: string): void => {
-    navigator.clipboard.writeText(code);
+    // Remove markdown code fences if present
+    const cleanedCode = code.replace(/^```[\s\S]*?\n/, '').replace(/```$/, '');
+    navigator.clipboard.writeText(cleanedCode);
     // Show toast or notification
+    if (typeof window !== 'undefined') {
+      alert('Code copied to clipboard!');
+    }
   };
   
   // Download resource pack as markdown
@@ -141,6 +171,24 @@ export default function ProjectCard({ project, onRefresh, onSave }: ProjectCardP
           ))}
         </div>
       </div>
+      
+      {/* AI Mentor Tip */}
+      {chatResponse && (
+        <div className="p-4 border-b border-dark-border bg-dark-element bg-opacity-30">
+          <h4 className="text-dark-text font-cabin font-bold mb-2">AI Mentor Tip:</h4>
+          <p className="text-dark-text font-source mb-2">{chatResponse.message}</p>
+          {chatResponse.resourceLink && (
+            <a 
+              href={chatResponse.resourceLink} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary-blue text-sm underline hover:text-primary-purple"
+            >
+              Helpful Resource
+            </a>
+          )}
+        </div>
+      )}
       
       {/* Milestones */}
       <div className="p-4">
@@ -210,6 +258,9 @@ export default function ProjectCard({ project, onRefresh, onSave }: ProjectCardP
                   {/* Code snippet */}
                   {codeSnippetVisible === index && project.codeSnippets.map((snippet, i) => {
                     if (snippet.milestoneIndex === index) {
+                      // Remove markdown code fences for display
+                      const displayCode = snippet.code.replace(/^```[\s\S]*?\n/, '').replace(/```$/, '');
+                      
                       return (
                         <div key={i} className="mt-2 p-3 bg-dark-element rounded-md border border-dark-border">
                           <div className="flex justify-between items-center mb-2">
@@ -222,7 +273,7 @@ export default function ProjectCard({ project, onRefresh, onSave }: ProjectCardP
                             </button>
                           </div>
                           <pre className="text-sm overflow-x-auto font-jetbrains text-dark-text whitespace-pre-wrap bg-black bg-opacity-30 p-2 rounded">
-                            {snippet.code}
+                            {displayCode}
                           </pre>
                           {snippet.debugHint && (
                             <div className="mt-2 p-2 bg-accent-yellow bg-opacity-20 rounded text-xs text-dark-text">
@@ -247,7 +298,7 @@ export default function ProjectCard({ project, onRefresh, onSave }: ProjectCardP
           onClick={onRefresh}
           className="px-4 py-2 bg-primary-blue text-dark-text rounded-md font-cabin transition-all duration-200 hover:scale-105 hover:bg-accent-pink flex-1"
         >
-          Generate New Idea
+          Regenerate Idea
         </button>
         <button
           onClick={onSave}

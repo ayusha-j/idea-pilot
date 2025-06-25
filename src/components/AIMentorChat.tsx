@@ -1,46 +1,145 @@
-import { useState, useRef, useEffect } from 'react';
+'use client';
+
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { sendMentorMessage, getChatHistory, clearChatHistory } from '@/lib/api';
-import { ProjectDetails, ChatMessage, ChatResponse } from '@/types/project';
 import { toast } from 'react-hot-toast';
 
-interface AIMentorChatProps {
-  projectContext: ProjectDetails;
+// Define proper type interfaces aligned with ProjectDetails
+interface ResourcePack {
+  links: string[];
+  wildcardLink: string;
+  markdownContent: string;
 }
 
-type ApiMessage = {
+interface Milestone {
+  task: string;
+  description: string;
+  estimatedTime: string;
+  resourceLink: string;
+}
+
+interface CodeSnippet {
+  milestoneIndex: number;
+  code: string;
+  debugHint?: string;
+}
+
+interface ProjectDetails {
+  title: string;
+  description: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  domain: string;
+  vibe: string;
+  milestones: Milestone[];
+  tools: string[];
+  codeSnippets: CodeSnippet[];
+  resourcePack: ResourcePack;
+  
+}
+
+interface ChatMessage {
+  id: number;
+  role: 'user' | 'ai';
+  sender: 'user' | 'ai';
+  text: string;
+  timestamp: Date;
+  resourceLink?: string;
+  followUpQuestions?: string[];
+}
+
+interface ApiMessage {
   role: 'user' | 'ai';
   content: string;
   timestamp: string;
   resourceLink?: string;
   followUpQuestions?: string[];
-};
+}
 
-export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
+interface AIMentorChatProps {
+  projectContext: ProjectDetails;
+  initialMessage?: string;
+  followUpQuestions?: string[];
+}
+
+export default function AIMentorChat({
+  projectContext,
+  initialMessage,
+  followUpQuestions
+}: AIMentorChatProps) {
+  // State management
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState<boolean>(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   
+  // References
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Create default greeting message using useCallback to avoid dependency issues
+  const createDefaultGreeting = useCallback(() => {
+    setMessages([
+      {
+        id: 1,
+        role: 'ai',
+        sender: 'ai',
+        text: `Hi there! I'm your AI project mentor for "${projectContext?.title || 'your project'}". How can I help you today?`,
+        timestamp: new Date(),
+        followUpQuestions: [
+          "Need help getting started?",
+          "Want to understand the project better?",
+          "Looking for specific resources?"
+        ]
+      }
+    ]);
+  }, [projectContext?.title]);
+
+  // Initialize with the provided initial message if available
+  useEffect(() => {
+    if (initialMessage && messages.length === 0 && !isHistoryLoaded) {
+      setMessages([
+        {
+          id: 1,
+          role: 'ai',
+          sender: 'ai',
+          text: initialMessage,
+          followUpQuestions: followUpQuestions || [],
+          timestamp: new Date()
+        }
+      ]);
+      setIsHistoryLoaded(true);
+    }
+  }, [initialMessage, followUpQuestions, messages.length, isHistoryLoaded]);
+
   // Load existing chat session from localStorage on component mount
   useEffect(() => {
-    const storedUserId = localStorage.getItem('mentor_chat_user_id');
-    const storedProjectId = localStorage.getItem(`mentor_chat_project_id_${projectContext.title}`);
+    const loadSession = () => {
+      try {
+        const storedUserId = localStorage.getItem('mentor_chat_user_id');
+        const storedProjectId = localStorage.getItem(`mentor_chat_project_id_${projectContext?.title || 'default'}`);
+        
+        if (storedUserId) {
+          setUserId(storedUserId);
+        }
+        
+        if (storedProjectId) {
+          setProjectId(storedProjectId);
+        }
+      } catch (error) {
+        console.error('Error loading chat session from localStorage:', error);
+      }
+    };
     
-    if (storedUserId) {
-      setUserId(storedUserId);
-    }
-    
-    if (storedProjectId) {
-      setProjectId(storedProjectId);
-    }
-  }, [projectContext.title]);
+    loadSession();
+  }, [projectContext?.title]);
   
   // Load chat history when userId and projectId are available
   useEffect(() => {
     const loadChatHistory = async () => {
+      if (!projectContext?.title) return;
+      
       if (userId && projectId && !isHistoryLoaded) {
         try {
           setIsLoading(true);
@@ -49,6 +148,7 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
           // Convert server timestamps to Date objects
           const formattedHistory = (history as unknown as ApiMessage[]).map((msg, index) => ({
             id: index + 1,
+            role: msg.role,
             sender: msg.role,
             text: msg.content,
             timestamp: new Date(msg.timestamp),
@@ -58,88 +158,55 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
           
           if (formattedHistory.length > 0) {
             setMessages(formattedHistory);
-          } else {
-            // Add initial greeting if no history
-            setMessages([
-              {
-                id: 1,
-                role:'ai',
-                sender: 'ai',
-                text: `Hi there! I'm your AI project mentor for "${projectContext.title}". How can I help you today?`,
-                timestamp: new Date(),
-                followUpQuestions: [
-                  "Need help getting started?",
-                  "Want to understand the project better?",
-                  "Looking for specific resources?"
-                ]
-              }
-            ]);
+          } else if (!initialMessage) {
+            // Add default greeting if no history and no initial message
+            createDefaultGreeting();
           }
           
           setIsHistoryLoaded(true);
         } catch (error) {
           console.error('Error loading chat history:', error);
-          // Fall back to initial greeting
-          setMessages([
-            {
-              id: 1,
-              role:'ai',
-              sender: 'ai',
-              text: `Hi there! I'm your AI project mentor for "${projectContext.title}". How can I help you today?`,
-              timestamp: new Date(),
-              followUpQuestions: [
-                "Need help getting started?",
-                "Want to understand the project better?",
-                "Looking for specific resources?"
-              ]
-            }
-          ]);
+          // Fall back to default greeting if no initial message
+          if (!initialMessage) {
+            createDefaultGreeting();
+          }
           setIsHistoryLoaded(true);
         } finally {
           setIsLoading(false);
         }
-      } else if (!isHistoryLoaded) {
-        // No stored session, add initial greeting
-        setMessages([
-          {
-            id: 1,
-            role:'ai',
-            sender: 'ai',
-            text: `Hi there! I'm your AI project mentor for "${projectContext.title}". How can I help you today?`,
-            timestamp: new Date(),
-            followUpQuestions: [
-              "Need help getting started?",
-              "Want to understand the project better?",
-              "Looking for specific resources?"
-            ]
-          }
-        ]);
+      } else if (!isHistoryLoaded && !initialMessage) {
+        // No stored session and no initial message, add default greeting
+        createDefaultGreeting();
         setIsHistoryLoaded(true);
       }
     };
     
     loadChatHistory();
-  }, [userId, projectId, projectContext.title, isHistoryLoaded]);
+  }, [userId, projectId, projectContext, isHistoryLoaded, initialMessage, createDefaultGreeting]);
   
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
   
+  // Scroll to bottom of chat
   const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   
+  // Handle sending a new message
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    
+    const messageText = newMessage.trim();
+    if (!messageText || isLoading) return;
     
     // Add user message
     const userMessage: ChatMessage = {
       id: messages.length + 1,
-      role:'user',
+      role: 'user',
       sender: 'user',
-      text: newMessage,
+      text: messageText,
       timestamp: new Date()
     };
     
@@ -150,7 +217,7 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
     try {
       // Call API with current context
       const response = await sendMentorMessage(
-        newMessage,
+        messageText,
         projectContext,
         messages,
         userId,
@@ -165,13 +232,13 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
       
       if (response.projectId && response.projectId !== projectId) {
         setProjectId(response.projectId);
-        localStorage.setItem(`mentor_chat_project_id_${projectContext.title}`, response.projectId);
+        localStorage.setItem(`mentor_chat_project_id_${projectContext?.title || 'default'}`, response.projectId);
       }
       
       // Add AI response
       const aiResponse: ChatMessage = {
         id: messages.length + 2,
-        role:'ai',
+        role: 'ai',
         sender: 'ai',
         text: response.chatResponse.message,
         resourceLink: response.chatResponse.resourceLink,
@@ -187,7 +254,7 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
       // Add error message
       const errorMessage: ChatMessage = {
         id: messages.length + 2,
-        role:'ai',
+        role: 'ai',
         sender: 'ai',
         text: "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
         timestamp: new Date()
@@ -199,31 +266,43 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
     }
   };
   
+  // Handle clicking a quick reply button
   const handleQuickReply = (question: string): void => {
     setNewMessage(question);
+    
+    // Focus on input after setting the quick reply
+    const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+    if (input) {
+      setTimeout(() => {
+        input.focus();
+      }, 0);
+    }
   };
   
+  // Clear chat history
   const handleClearChat = async (): Promise<void> => {
-    if (!userId || !projectId) return;
+    if ((!userId || !projectId) && messages.length === 0) return;
     
     try {
-      await clearChatHistory(userId, projectId);
+      if (userId && projectId) {
+        await clearChatHistory(userId, projectId);
+      }
       
       // Reset messages to initial greeting
-      setMessages([
-        {
-          id: 1,
-          role:'ai',
-          sender: 'ai',
-          text: `Hi there! I'm your AI project mentor for "${projectContext.title}". How can I help you today?`,
-          timestamp: new Date(),
-          followUpQuestions: [
-            "Need help getting started?",
-            "Want to understand the project better?",
-            "Looking for specific resources?"
-          ]
-        }
-      ]);
+      if (initialMessage) {
+        setMessages([
+          {
+            id: 1,
+            role: 'ai',
+            sender: 'ai',
+            text: initialMessage,
+            followUpQuestions: followUpQuestions || [],
+            timestamp: new Date()
+          }
+        ]);
+      } else {
+        createDefaultGreeting();
+      }
       
       toast.success('Chat history cleared');
     } catch (error) {
@@ -233,7 +312,7 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-[500px] bg-dark-card rounded-lg shadow-md border border-dark-border overflow-hidden">
+    <div className="flex flex-col h-full bg-dark-card rounded-lg shadow-md border border-dark-border overflow-hidden">
       {/* Chat header */}
       <div className="bg-dark-element text-dark-text p-4 font-cabin flex justify-between items-center">
         <div>
@@ -252,7 +331,11 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
       </div>
       
       {/* Messages container */}
-      <div className="flex-1 p-4 overflow-y-auto bg-dark-bg">
+      <div 
+        ref={chatContainerRef}
+        className="flex-1 p-4 overflow-y-auto bg-dark-bg"
+        style={{ maxHeight: 'calc(500px - 120px)' }}
+      >
         {isHistoryLoaded ? (
           <>
             {messages.map((message) => (
@@ -335,11 +418,17 @@ export default function AIMentorChat({ projectContext }: AIMentorChatProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)}
             placeholder="Ask about your project..."
             className="flex-1 p-2 bg-dark-card border border-dark-border text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-primary-purple font-source"
+            disabled={isLoading}
           />
           <button
             type="submit"
             disabled={isLoading || !newMessage.trim()}
-            className="ml-2 p-2 bg-primary-purple text-dark-text rounded-md transition-all duration-200 hover:bg-accent-pink disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`ml-2 p-2 ${
+              isLoading || !newMessage.trim() 
+                ? 'bg-dark-element text-dark-text-secondary cursor-not-allowed' 
+                : 'bg-primary-purple text-dark-text hover:bg-accent-pink'
+            } rounded-md transition-colors duration-200`}
+            aria-label="Send message"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />

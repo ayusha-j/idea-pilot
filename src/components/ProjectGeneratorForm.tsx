@@ -1,31 +1,51 @@
-import { useState } from 'react';
-import { generateProject } from '@/lib/api';
-import { ProjectResponse } from '@/types/project';
-import { toast } from 'react-hot-toast';
+// src/components/ProjectGeneratorForm.tsx
+'use client';
 
+import { useState, FormEvent } from 'react';
+import { ProjectResponse } from '@/types/project';
+
+// Define the props interface properly
 interface ProjectGeneratorFormProps {
-  onProjectGenerated: (project: ProjectResponse) => void;
+  onProjectGenerated: (projectData: ProjectResponse) => void;
 }
 
 export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGeneratorFormProps) {
+  // Form state
   const [conceptText, setConceptText] = useState<string>('');
-  const [experienceLevel, setExperienceLevel] = useState<number>(3);
+  const [experienceLevel, setExperienceLevel] = useState<number>(2);
   const [domain, setDomain] = useState<string>('coding');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  // Handle form submission
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
     
     try {
-      // Call our API service to generate project
-      const projectData = await generateProject(conceptText, experienceLevel, domain);
+      // Call your API service
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/generate-project`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          conceptText,
+          experienceLevel,
+          domain,
+        }),
+      });
       
-      // Pass the generated project to parent component
+      if (!response.ok) {
+        throw new Error('Failed to generate project');
+      }
+      
+      const projectData: ProjectResponse = await response.json();
+      
+      // Pass the data to parent component
       onProjectGenerated(projectData);
       
       // Trigger confetti on successful generation
-      if (window.confetti) {
+      if (typeof window !== 'undefined' && window.confetti) {
         window.confetti({
           particleCount: 100,
           spread: 70,
@@ -34,81 +54,75 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
       }
     } catch (error) {
       console.error('Error generating project:', error);
-      toast.error('Failed to generate project. Please try again.');
+      alert('Failed to generate project. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
   
-  // Helper function to get difficulty label color
-  const getDifficultyColor = (level: number): string => {
-    if (level <= 2) return '#10B981'; // Emerald Green - Beginner
-    if (level <= 4) return '#F59E0B'; // Warm Orange - Intermediate
-    return '#EF4444'; // Red - Advanced
-  };
-  
-  const getExperienceLevelLabel = (level: number): string => {
-    if (level <= 2) return 'Beginner';
-    if (level <= 4) return 'Intermediate';
-    return 'Advanced';
-  };
-
   return (
-    <div className="w-full max-w-2xl mx-auto p-6 bg-dark-card rounded-lg shadow-md border border-dark-border">
-      <h2 className="text-2xl font-bold text-dark-text mb-6 font-cabin">Generate Your Project</h2>
+    <div className="bg-dark-card rounded-lg shadow-md border border-dark-border overflow-hidden">
+      <div className="p-4 bg-gradient-to-r from-primary-purple to-primary-blue text-dark-text">
+        <h2 className="text-xl font-bold font-cabin">Generate Project Idea</h2>
+      </div>
       
-      <form onSubmit={handleSubmit}>
+      <form className="p-6" onSubmit={handleSubmit}>
         <div className="mb-6">
-          <label htmlFor="concept" className="block text-dark-text font-source font-medium mb-2">
-            Enter a concept or paste a lecture transcript
+          <label htmlFor="concept" className="block text-dark-text font-cabin font-medium mb-2">
+            Concept or Learning Goal
           </label>
           <textarea
             id="concept"
+            name="concept"
             value={conceptText}
             onChange={(e) => setConceptText(e.target.value)}
-            className="w-full p-3 bg-dark-element border border-dark-border rounded-md text-dark-text focus:outline-none focus:ring-2 focus:ring-primary-purple font-source"
-            rows={5}
-            placeholder="e.g., machine learning or paste your lecture transcript here..."
             required
-          />
+            placeholder="Describe what you want to learn or build, e.g., 'A web app that helps track habits' or 'Learn TensorFlow by building something'"
+            className="w-full p-3 bg-dark-element border border-dark-border rounded-md text-dark-text font-source focus:outline-none focus:ring-2 focus:ring-primary-purple resize-none min-h-[120px]"
+          ></textarea>
         </div>
         
         <div className="mb-6">
-          <label htmlFor="experience" className="block text-dark-text font-source font-medium mb-2">
-            Experience Level: <span style={{ color: getDifficultyColor(experienceLevel) }}>{getExperienceLevelLabel(experienceLevel)}</span>
+          <label htmlFor="experience" className="block text-dark-text font-cabin font-medium mb-2">
+            Experience Level
           </label>
-          <input
-            id="experience"
-            type="range"
-            min={1}
-            max={5}
-            value={experienceLevel}
-            onChange={(e) => setExperienceLevel(parseInt(e.target.value))}
-            className="w-full h-2 bg-dark-element rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="flex justify-between text-xs text-dark-text-secondary font-source mt-1">
-            <span>Beginner</span>
-            <span>Advanced</span>
+          <div className="flex flex-col">
+            <input
+              id="experience"
+              name="experience"
+              type="range"
+              min="1"
+              max="3"
+              step="1"
+              value={experienceLevel}
+              onChange={(e) => setExperienceLevel(parseInt(e.target.value))}
+              className="w-full accent-primary-purple mb-2"
+            />
+            <div className="flex justify-between text-sm text-dark-text-secondary">
+              <span>Beginner</span>
+              <span>Intermediate</span>
+              <span>Advanced</span>
+            </div>
           </div>
         </div>
         
-        <div className="mb-8">
-          <label className="block text-dark-text font-source font-medium mb-2">
-            Area of Interest
+        <div className="mb-6">
+          <label className="block text-dark-text font-cabin font-medium mb-2">
+            Project Domain
           </label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {['coding', 'hardware', 'design', 'research'].map((area) => (
               <button
                 key={area}
                 type="button"
                 onClick={() => setDomain(area)}
-                className={`py-2 px-4 rounded-md transition-all duration-200 hover:scale-105 capitalize font-source ${
+                className={`p-3 rounded-md border ${
                   domain === area
-                    ? 'bg-primary-purple text-dark-text'
-                    : 'bg-dark-element text-dark-text border border-dark-border'
-                }`}
+                    ? 'bg-primary-purple border-primary-purple text-dark-text'
+                    : 'bg-dark-element border-dark-border text-dark-text-secondary hover:border-primary-purple'
+                } transition-colors flex items-center justify-center`}
               >
-                {area}
+                <span className="text-sm font-medium capitalize font-source">{area}</span>
               </button>
             ))}
           </div>
@@ -116,17 +130,14 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
         
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full py-3 bg-accent-pink text-dark-text rounded-md font-cabin font-bold transition-all duration-200 hover:scale-105 hover:bg-primary-purple flex justify-center items-center"
+          disabled={isSubmitting || !conceptText.trim()}
+          className={`w-full py-3 rounded-md font-bold font-cabin text-dark-text transition-all duration-200 ${
+            isSubmitting || !conceptText.trim()
+              ? 'bg-dark-element cursor-not-allowed opacity-70'
+              : 'bg-primary-purple hover:bg-accent-pink hover:scale-105'
+          }`}
         >
-          {isLoading ? (
-            <svg className="animate-spin h-5 w-5 text-dark-text" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          ) : (
-            'Generate Project Idea'
-          )}
+          {isSubmitting ? 'Generating...' : 'Generate Project Idea'}
         </button>
       </form>
     </div>

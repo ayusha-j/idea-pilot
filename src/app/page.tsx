@@ -70,7 +70,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
               <h2 className="text-4xl md:text-5xl font-bold text-dark-text font-cabin mb-6 leading-tight">
-                Generate Personalized Projects with <span className="text-primary-purple">AI Mentorship</span>
+                Generate Personalized Projects with <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-purple to-primary-blue">AI Mentorship</span>
               </h2>
               <p className="text-dark-text-secondary font-source text-lg mb-8">
                 Idea Pilot helps students, career switchers, and hobbyists apply new concepts through hands-on projects with structured roadmaps and real-time AI mentoring.
@@ -193,8 +193,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-
       
       {/* Footer */}
       <footer className="py-8 px-4 bg-dark-card border-t border-dark-border">

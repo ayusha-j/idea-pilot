@@ -1,15 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Basic styles */
+:root {
+  color-scheme: dark;
+}
 
+body {
+  @apply bg-dark-bg text-dark-text font-source;
+}
 
-.test-direct-css {
-  background-color: purple;
-  color: white;
-  padding: 20px;
-  margin: 20px;
-  border: 5px solid green;
-  border-radius: 8px;
+h1, h2, h3, h4, h5, h6 {
+  @apply font-cabin font-bold;
+}
+
+/* Custom utility classes */
+@layer components {
+  .btn {
+    @apply px-6 py-3 rounded-md font-bold transition-all duration-200;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-purple text-dark-text hover:bg-accent-pink hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-dark-element text-dark-text hover:bg-dark-border;
+  }
+  
+  .btn-accent {
+    @apply bg-accent-pink text-dark-text hover:bg-primary-purple hover:scale-105;
+  }
+  
+  .container-section {
+    @apply container mx-auto max-w-6xl px-4;
+  }
+  
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-purple to-primary-blue;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+/* Header styling */
+.main-header {
+  @apply bg-dark-card shadow-lg border-b border-dark-border;
+}
+
+/* Feature card styling */
+.feature-card {
+  @apply bg-dark-card rounded-lg p-6 border border-dark-border shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary-purple;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-dark-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-dark-element rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-dark-border;
 }

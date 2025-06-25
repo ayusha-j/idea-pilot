@@ -1,147 +1,144 @@
-"use client";
+// src/components/LoginPage.tsx
+'use client';
 
 import { useState } from 'react';
 import { signIn, signUp, AuthResponse } from '@/lib/supabase';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation'; // Changed from 'next/router'
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [fullName, setFullName] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
-      let result: AuthResponse;
+      let response: AuthResponse;
       
       if (isLogin) {
-        result = await signIn(email, password);
+        // Handle login
+        response = await signIn(email, password);
       } else {
-        result = await signUp(email, password);
+        // Handle sign up
+        response = await signUp(email, password, fullName);
       }
       
-      if (result.error) {
-        throw new Error(result.error.message);
+      if (response.error) {
+        setError(response.error.message);
+      } else if (response.data?.user) {
+        // Check if email confirmation is required based on session presence
+        if (!response.data.session && !isLogin) {
+          setError('Please check your email to confirm your account before logging in');
+        } else {
+          router.push('/dashboard'); // Changed from router.replace
+        }
       }
-      
-      // Successful login/signup
-      router.push('/dashboard');
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred');
-      }
+    } catch (err: unknown) {
+      setError(
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message?: string }).message)
+          : 'An unexpected error occurred'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-bg p-4">
-      <div className="w-full max-w-md">
-        {/* Logo and header */}
-        <div className="text-center mb-8">
-          <div className="inline-block bg-dark-element p-4 rounded-full shadow-lg mb-4">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="w-12 h-12"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-dark-text font-cabin">Idea Pilot</h1>
-          <p className="text-dark-text-secondary font-source">
-            Your AI-powered DIY project generator and mentor
+    <div className="min-h-screen flex items-center justify-center bg-dark-bg">
+      <div className="w-full max-w-md p-8 space-y-8 bg-dark-card rounded-lg shadow-xl border border-dark-border">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-dark-text">
+            {isLogin ? 'Sign In' : 'Create Account'}
+          </h1>
+          <p className="mt-2 text-dark-text-secondary">
+            {isLogin 
+              ? 'Welcome back to Idea Pilot'
+              : 'Start your journey with Idea Pilot'}
           </p>
         </div>
         
-        {/* Auth form */}
-        <div className="bg-dark-card rounded-lg shadow-md p-6 border border-dark-border">
-          <h2 className="text-2xl font-bold text-dark-text mb-6 font-cabin">
-            {isLogin ? 'Log In to Your Account' : 'Create a New Account'}
-          </h2>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {!isLogin && (
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-dark-text">
+                Full Name
+              </label>
+              <input
+                id="fullName"
+                name="fullName"
+                type="text"
+                required={!isLogin}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 bg-dark-element border border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary-purple focus:border-primary-purple"
+              />
+            </div>
+          )}
+          
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-dark-text">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 bg-dark-element border border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary-purple focus:border-primary-purple"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-dark-text">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete={isLogin ? "current-password" : "new-password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 bg-dark-element border border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary-purple focus:border-primary-purple"
+            />
+          </div>
           
           {error && (
-            <div className="mb-4 p-3 bg-red-900 bg-opacity-30 text-red-300 border border-red-900 rounded-md text-sm">
+            <div className="text-badge-red text-sm p-2 bg-dark-element/50 rounded-md">
               {error}
             </div>
           )}
           
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-dark-text font-source font-medium mb-2">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                className="w-full p-3 bg-dark-element border border-dark-border text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-primary-purple"
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-            
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-dark-text font-source font-medium mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                className="w-full p-3 bg-dark-element border border-dark-border text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-primary-purple"
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
-            </div>
-            
+          <div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-primary-purple text-dark-text rounded-md font-cabin font-bold transition-all duration-200 hover:scale-105 hover:bg-accent-pink flex justify-center items-center"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-primary-purple hover:bg-primary-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-purple disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
-                <svg className="animate-spin h-5 w-5 text-dark-text" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : (
-                isLogin ? 'Log In' : 'Sign Up'
-              )}
-            </button>
-          </form>
-          
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-primary-blue hover:text-primary-purple font-source"
-            >
-              {isLogin ? 'Need an account? Sign up' : 'Already have an account? Log in'}
+              {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
             </button>
           </div>
-          
-          <div className="mt-8 pt-6 border-t border-dark-border text-center">
-            <p className="text-dark-text-secondary text-sm font-source">
-              Idea Pilot helps you create DIY projects and provides mentorship along the way.
-            </p>
-          </div>
+        </form>
+        
+        <div className="text-center mt-4">
+          <button 
+            onClick={() => setIsLogin(!isLogin)} 
+            className="text-primary-blue hover:text-primary-purple cursor-pointer text-sm"
+          >
+            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+          </button>
         </div>
       </div>
     </div>
