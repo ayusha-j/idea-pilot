@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     // Forward the request to your Flask backend
-    const flaskResponse = await fetch('http://localhost:5000/api/regenerate-project', {
+    const flaskResponse = await fetch('http://168.231.122.158/api/regenerate-project', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
