@@ -1,7 +1,7 @@
 // lib/api.ts
 import { ProjectDetails, ChatMessage, ChatResponse } from '@/types/project';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://168.231.122.158/api';
 
 /**
  * Generate a project idea
