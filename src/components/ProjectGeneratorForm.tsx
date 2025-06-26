@@ -3,6 +3,7 @@
 
 import { useState, FormEvent } from 'react';
 import { ProjectResponse } from '@/types/project';
+import { generateProject } from '@/lib/api';
 
 // Define the props interface properly
 interface ProjectGeneratorFormProps {
@@ -22,8 +23,8 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
     setIsSubmitting(true);
     
     try {
-      // Call your API service
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/generate-project`, {
+      // Use local API endpoint instead of direct backend URL
+      const response = await fetch('/api/generate-project', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +37,8 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
       });
       
       if (!response.ok) {
-        throw new Error('Failed to generate project');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate project');
       }
       
       const projectData: ProjectResponse = await response.json();

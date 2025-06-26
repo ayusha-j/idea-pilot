@@ -1,7 +1,7 @@
 // lib/api.ts
 import { ProjectDetails, ChatMessage, ChatResponse } from '@/types/project';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://168.231.122.158/api';
+const API_URL = '/api'; // Use relative URL to work with proxied routes
 
 /**
  * Generate a project idea
@@ -41,7 +41,7 @@ export async function sendMentorMessage(
   userId?: string,
   projectId?: string
 ): Promise<{ chatResponse: ChatResponse; userId: string; projectId: string }> {
-  const response = await fetch(`${API_URL}/api/mentor-chat`, {
+  const response = await fetch(`${API_URL}/mentor-chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -111,26 +111,94 @@ export async function clearChatHistory(
   return await response.json();
 }
 
-// src/lib/api.ts (add this function if you have an API service file)
-
-export const regenerateProject = async (): Promise<unknown> => {
+/**
+ * Save a project to the user's profile
+ */
+export async function saveProject(
+  userId: string,
+  project: any,
+  concept?: string,
+  experienceLevel?: number
+): Promise<{ success: boolean; message: string; projectId?: string }> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/regenerate-project`, {
+    console.log('Saving project for user:', userId);
+    
+    const response = await fetch(`${API_URL}/save-project`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Includes cookies for session handling
+      body: JSON.stringify({
+        userId,
+        project,
+        concept,
+        experienceLevel
+      }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to regenerate project');
+      console.error('Error response:', errorData);
+      throw new Error(errorData.error || 'Failed to save project');
     }
 
     return await response.json();
-  } catch (error: unknown) {
-    console.error('Error regenerating project:', error);
+  } catch (error) {
+    console.error('Error saving project:', error);
     throw error;
   }
-};
+}
+
+/**
+ * Get user's saved projects
+ */
+export async function getUserProjects(userId: string): Promise<any[]> {
+  try {
+    console.log('Getting projects for user:', userId);
+    
+    const response = await fetch(`${API_URL}/user-projects/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Error response:', errorData);
+      throw new Error(errorData.error || 'Failed to get user projects');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting user projects:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get a specific project by ID
+ */
+export async function getProject(projectId: string): Promise<any> {
+  try {
+    console.log('Getting project:', projectId);
+    
+    const response = await fetch(`${API_URL}/project/${projectId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Error response:', errorData);
+      throw new Error(errorData.error || 'Failed to get project');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting project:', error);
+    throw error;
+  }
+}

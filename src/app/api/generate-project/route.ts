@@ -1,4 +1,4 @@
-// app/api/regenerate-project/route.ts
+// app/api/generate-project/route.ts
 import { NextResponse } from 'next/server';
 import https from 'https';
 
@@ -12,7 +12,7 @@ const httpsAgent = new https.Agent({
 
 export async function POST(request: Request) {
   try {
-    console.log('Handling regenerate-project request');
+    console.log('Handling generate-project request');
     
     // Get the request body
     let body = {};
@@ -21,12 +21,12 @@ export async function POST(request: Request) {
       console.log('Request body:', body);
     } catch (e) {
       console.log('Error parsing request body:', e);
-      // If there's no body or it's not valid JSON, use an empty object
       console.log('No body or invalid JSON, using empty object');
     }
     
-    // Use the correct path to the API endpoint - include /api/ prefix
-    const apiUrl = `${BACKEND_URL}/api/regenerate-project`;
+    // Important: Use the CORRECT full path to the API endpoint
+    // Note: No double /api/ here - just use the correct endpoint path
+    const apiUrl = `${BACKEND_URL}/api/generate-project`;
     console.log(`Forwarding request to ${apiUrl}`);
     
     // Forward the request to your Flask backend with certificate validation disabled
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     console.error('Error processing request:', error);
     
-    // Return an error response with detailed information
+    // Return an error response
     return NextResponse.json(
       { 
         error: 'Failed to connect to backend server',

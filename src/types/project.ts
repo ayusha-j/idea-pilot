@@ -1,4 +1,5 @@
-// src/types/project.ts
+// types/project.ts
+
 export interface Milestone {
   task: string;
   description: string;
@@ -43,10 +44,19 @@ export interface ProjectResponse {
 
 export interface ChatMessage {
   id: number;
-  role: 'user' | 'ai';
   sender: 'user' | 'ai';
   text: string;
-  timestamp: Date;
-  resourceLink?: string;
+  timestamp?: Date;
   followUpQuestions?: string[];
+}
+
+export interface SavedProject {
+  id: string;
+  user_id: string;
+  project_details: ProjectDetails;
+  concept?: string;
+  experience_level?: number;
+  domain?: string;
+  created_at: string;
+  updated_at: string;
 }

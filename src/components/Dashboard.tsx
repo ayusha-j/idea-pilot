@@ -66,6 +66,11 @@ interface ProjectResponse {
   chatResponse: ChatResponse;
 }
 
+// Parsed project interface
+interface ParsedSavedProject extends Omit<SavedProject, 'project_details'> {
+  project_details: ProjectDetails;
+}
+
 export default function Dashboard() {
   // State management
   const [user, setUser] = useState<User | null>(null);
@@ -73,7 +78,7 @@ export default function Dashboard() {
   const [regenerating, setRegenerating] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'generator' | 'saved' | 'community'>('generator');
   const [generatedProject, setGeneratedProject] = useState<ProjectResponse | null>(null);
-  const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
+  const [savedProjects, setSavedProjects] = useState<ParsedSavedProject[]>([]);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   
   // Hooks
@@ -109,10 +114,38 @@ export default function Dashboard() {
     checkAuthentication();
   }, [router, activeTab]);
   
-  // Load user's saved projects
+  // Load user's saved projects from the new API endpoint
   const loadSavedProjects = async (userId: string): Promise<void> => {
     setLoading(true);
     try {
+      // First try to use the fetch API with the new Next.js route
+      try {
+        console.log('Fetching saved projects from API');
+        const response = await fetch(`/api/user-projects/${userId}`);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const projects = await response.json();
+        console.log('Projects from API:', projects);
+        
+        // Parse the project_details JSON strings into objects
+        const parsedProjects = projects.map((project: any) => ({
+          ...project,
+          project_details: typeof project.project_details === 'string' 
+            ? JSON.parse(project.project_details) 
+            : project.project_details
+        }));
+        
+        console.log('Parsed projects:', parsedProjects);
+        setSavedProjects(parsedProjects);
+        return;
+      } catch (apiError) {
+        console.error('API fetch failed, falling back to Supabase:', apiError);
+      }
+      
+      // Fallback to the old Supabase method if the API fails
       const { data, error } = await getUserProjects(userId);
       
       if (error) {
@@ -120,7 +153,15 @@ export default function Dashboard() {
       }
       
       if (data) {
-        setSavedProjects(data);
+        // Parse the project_details for each project
+        const parsedProjects = data.map(project => ({
+          ...project,
+          project_details: typeof project.project_details === 'string'
+            ? JSON.parse(project.project_details)
+            : project.project_details
+        }));
+        
+        setSavedProjects(parsedProjects);
       }
     } catch (error) {
       console.error('Failed to load saved projects:', error);
@@ -347,45 +388,63 @@ export default function Dashboard() {
           chatResponse={generatedProject.chatResponse}
           onRefresh={regenerating ? () => {} : handleRefreshProjectViaProxy}
           onSave={handleSaveProject}
+          conceptText=""
+          experienceLevel={2}
         />
       )}
     </div>
   );
   
   // Render the saved projects tab content
-  const renderSavedProjectsTab = () => (
-    <div>
-      <h2 className="text-2xl font-bold text-dark-text mb-6 font-cabin">Your Saved Projects</h2>
-      
-      {savedProjects.length === 0 ? (
-        <div className="bg-dark-card rounded-lg shadow-md border border-dark-border p-8 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-dark-text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          <p className="text-dark-text font-source">
-            You haven&apos;t saved any projects yet. Generate a project idea and save it to see it here!
-          </p>
-          <button
-            onClick={() => switchTab('generator')}
-            className="mt-4 px-4 py-2 bg-primary-purple text-dark-text rounded-md hover:bg-accent-pink transition-colors font-cabin"
-          >
-            Generate a Project
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-8">
-          {savedProjects.map((savedProject) => (
-            <ProjectCard
-              key={savedProject.id}
-              project={savedProject.project_details}
-              onRefresh={() => {}}
-              onSave={() => {}}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  const renderSavedProjectsTab = () => {
+    // Check if we're still loading
+    if (loading) {
+      return renderLoading();
+    }
+    
+    return (
+      <div>
+        <h2 className="text-2xl font-bold text-dark-text mb-6 font-cabin">Your Saved Projects</h2>
+        
+        {savedProjects.length === 0 ? (
+          <div className="bg-dark-card rounded-lg shadow-md border border-dark-border p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-dark-text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <p className="text-dark-text font-source">
+              You haven&apos;t saved any projects yet. Generate a project idea and save it to see it here!
+            </p>
+            <button
+              onClick={() => switchTab('generator')}
+              className="mt-4 px-4 py-2 bg-primary-purple text-dark-text rounded-md hover:bg-accent-pink transition-colors font-cabin"
+            >
+              Generate a Project
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-8">
+            {savedProjects.map((savedProject) => {
+              console.log('Rendering saved project:', savedProject.id);
+              console.log('Project details:', savedProject.project_details);
+              
+              return (
+                <div key={savedProject.id} className="bg-dark-card rounded-lg shadow-md border border-dark-border">
+                  <ProjectCard
+                    key={savedProject.id}
+                    project={savedProject.project_details}
+                    onRefresh={() => {}}
+                    onSave={() => {}}
+                    conceptText={savedProject.concept || ""}
+                    experienceLevel={savedProject.experience_level || 2}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
   
   // Render the community tab content
   const renderCommunityTab = () => (
@@ -493,7 +552,7 @@ export default function Dashboard() {
       
       {/* Main content */}
       <main className="container mx-auto py-8 px-4">
-        {loading ? (
+        {loading && activeTab !== 'saved' ? (
           renderLoading()
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">

@@ -1,4 +1,4 @@
-// app/api/regenerate-project/route.ts
+// app/api/project/[projectId]/route.ts
 import { NextResponse } from 'next/server';
 import https from 'https';
 
@@ -10,38 +10,45 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: false
 });
 
-export async function POST(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: { projectId: string } }
+) {
   try {
-    console.log('Handling regenerate-project request');
+    const projectId = params.projectId;
+    console.log(`Handling get project detail request for project: ${projectId}`);
     
-    // Get the request body
-    let body = {};
-    try {
-      body = await request.json();
-      console.log('Request body:', body);
-    } catch (e) {
-      console.log('Error parsing request body:', e);
-      // If there's no body or it's not valid JSON, use an empty object
-      console.log('No body or invalid JSON, using empty object');
+    if (!projectId) {
+      return NextResponse.json(
+        { error: 'Missing projectId parameter' },
+        { status: 400 }
+      );
     }
     
-    // Use the correct path to the API endpoint - include /api/ prefix
-    const apiUrl = `${BACKEND_URL}/api/regenerate-project`;
-    console.log(`Forwarding request to ${apiUrl}`);
+    // Use the correct path to the API endpoint
+    const apiUrl = `${BACKEND_URL}/api/project/${projectId}`;
+    console.log(`Fetching from: ${apiUrl}`);
     
-    // Forward the request to your Flask backend with certificate validation disabled
+    // Forward the request to your Flask backend
     const backendResponse = await fetch(apiUrl, {
-      method: 'POST',
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify(body),
       // Use the agent that ignores SSL certificate validation
       agent: httpsAgent
     });
     
     // Log the response status for debugging
     console.log('Backend response status:', backendResponse.status);
+    
+    // Handle 404 specifically
+    if (backendResponse.status === 404) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      );
+    }
     
     // Get the response as text first (in case it's not valid JSON)
     const responseText = await backendResponse.text();
@@ -51,7 +58,7 @@ export async function POST(request: Request) {
     let responseData;
     try {
       responseData = JSON.parse(responseText);
-      console.log('Successfully parsed response as JSON');
+      console.log('Successfully parsed response');
     } catch (error) {
       console.error('Error parsing response as JSON');
       console.error(error);
