@@ -1,15 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '@/lib/supabase';
 
 export default function HomePage() {
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+  
+  // Ensure we're on the client side before using router
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   // Check if user is already authenticated
   useEffect(() => {
+    if (!isClient) return; // Don't run on server side
+    
     const checkAuth = async () => {
       try {
         const { user, error } = await getCurrentUser();
@@ -24,7 +32,16 @@ export default function HomePage() {
     };
     
     checkAuth();
-  }, [router]);
+  }, [router, isClient]);
+  
+  // Show loading state until client-side hydration is complete
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-purple"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-dark-bg">
