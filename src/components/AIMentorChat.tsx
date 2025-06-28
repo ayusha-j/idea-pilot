@@ -312,7 +312,7 @@ export default function AIMentorChat({
   };
 
   return (
-    <div className="flex flex-col h-full bg-dark-card rounded-lg shadow-md border border-dark-border overflow-hidden">
+    <div className="flex flex-col h-full bg-dark-card rounded-lg shadow-md border border-dark-border overflow-hidden pb-10">
       {/* Chat header */}
       <div className="bg-dark-element text-dark-text p-4 font-cabin flex justify-between items-center">
         <div>
@@ -417,7 +417,7 @@ export default function AIMentorChat({
             value={newMessage}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)}
             placeholder="Ask about your project..."
-            className="flex-1 p-2 bg-dark-card border border-dark-border text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-primary-purple font-source"
+            className="flex-1 p-4 bg-dark-card border border-dark-border text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-primary-purple font-source"
             disabled={isLoading}
           />
           <button
