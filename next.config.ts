@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  // Force all pages to be dynamic to avoid SSG issues with client-side code
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
   /* config options here */
 };
 
