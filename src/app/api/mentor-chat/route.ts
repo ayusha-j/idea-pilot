@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     console.log('Mentor chat request:', body);
     
     // Use environment variable for backend URL
-    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://a47d-136-232-6-66.ngrok-free.app/api';
+    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://00fd-136-232-6-66.ngrok-free.app/api';
     const apiUrl = `${BACKEND_URL}/api/mentor-chat`;
     
     console.log(`Forwarding mentor chat request to: ${apiUrl}`);
