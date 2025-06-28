@@ -45,15 +45,6 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
       
       // Pass the data to parent component
       onProjectGenerated(projectData, experienceLevel);
-      
-      // Trigger confetti on successful generation
-      if (typeof window !== 'undefined' && window.confetti) {
-        window.confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      }
     } catch (error) {
       console.error('Error generating project:', error);
       alert('Failed to generate project. Please try again.');

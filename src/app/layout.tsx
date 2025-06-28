@@ -1,6 +1,4 @@
-// src/app/layout.tsx
 import '@/styles/globals.css';
-import Script from 'next/script';
 import { Metadata, Viewport } from 'next';
 import { Toaster } from 'react-hot-toast';
 import { ChatProvider } from '@/app/contexts/ChatContext';
@@ -47,10 +45,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`dark ${cabin.variable} ${sourceSans.variable} ${jetbrainsMono.variable}`}>
-      <head>
-        {/* Include confetti library */}
-        <Script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0" strategy="beforeInteractive" />
-      </head>
       <body className="min-h-screen bg-dark-bg text-dark-text">
         <AuthProvider>
           <ChatProvider>
