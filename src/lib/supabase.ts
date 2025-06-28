@@ -73,40 +73,95 @@ export interface RealtimePayload<T> {
   [key: string]: unknown;
 }
 
-// Initialize Supabase client
+// Initialize Supabase client with better error handling
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
-// Ensure environment variables are defined
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+// Check if environment variables are properly configured
+if (!supabaseUrl || !supabaseAnonKey || 
+    supabaseUrl === 'https://your-project-id.supabase.co' || 
+    supabaseAnonKey === 'your-anon-key-here') {
+  console.error('❌ Supabase environment variables are not properly configured!');
+  console.error('Please update your .env.local file with your actual Supabase credentials.');
+  console.error('Click "Connect to Supabase" in the top right to get your real values.');
 }
 
-export const supabase: SupabaseClient<Database> = createClient<Database>(supabaseUrl, supabaseAnonKey);
-
-// Authentication Functions
-export const signUp = async (email: string, password: string, fullName?: string): Promise<AuthResponse> => {
-  // Adding fullName parameter for better user profiles
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName || email.split('@')[0], // Default to username from email if no full name
-      }
+export const supabase: SupabaseClient<Database> = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
     }
-  });
-  
-  return { data, error };
+  }
+);
+
+// Authentication Functions with better error handling
+export const signUp = async (email: string, password: string, fullName?: string): Promise<AuthResponse> => {
+  try {
+    // Check if Supabase is properly configured
+    if (!supabaseUrl || supabaseUrl === 'https://your-project-id.supabase.co') {
+      return {
+        data: null,
+        error: {
+          message: 'Supabase is not configured. Please set up your environment variables.',
+          status: 500
+        }
+      };
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName || email.split('@')[0],
+        }
+      }
+    });
+    
+    return { data, error };
+  } catch (err) {
+    return {
+      data: null,
+      error: {
+        message: 'Network error: Unable to connect to Supabase. Please check your internet connection and Supabase configuration.',
+        status: 500
+      }
+    };
+  }
 };
 
 export const signIn = async (email: string, password: string): Promise<AuthResponse> => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  
-  return { data, error };
+  try {
+    // Check if Supabase is properly configured
+    if (!supabaseUrl || supabaseUrl === 'https://your-project-id.supabase.co') {
+      return {
+        data: null,
+        error: {
+          message: 'Supabase is not configured. Please set up your environment variables.',
+          status: 500
+        }
+      };
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    return { data, error };
+  } catch (err) {
+    return {
+      data: null,
+      error: {
+        message: 'Network error: Unable to connect to Supabase. Please check your internet connection and Supabase configuration.',
+        status: 500
+      }
+    };
+  }
 };
 
 export const signOut = async (): Promise<{ error: AuthError | null }> => {
