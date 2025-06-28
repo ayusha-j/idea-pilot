@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },
+  // Disable static optimization completely
+  output: 'standalone',
+  trailingSlash: false,
   /* config options here */
 };
 

@@ -4,7 +4,6 @@ import { Toaster } from 'react-hot-toast';
 import { ChatProvider } from '@/app/contexts/ChatContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Cabin, Source_Sans_3, JetBrains_Mono } from 'next/font/google';
-import ClientAuthChecker from '@/components/ClientAuthChecker';
 
 // Define the fonts
 const cabin = Cabin({
@@ -50,7 +49,6 @@ export default function RootLayout({
         <AuthProvider>
           <ChatProvider>
             {children}
-            <ClientAuthChecker />
             <Toaster position="bottom-right" />
           </ChatProvider>
         </AuthProvider>
