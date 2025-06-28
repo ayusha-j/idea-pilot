@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { signIn, signUp, AuthResponse } from '@/lib/supabase';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
@@ -13,15 +13,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // Check if signup parameter is present
+  // Check URL for signup parameter on client side
   useEffect(() => {
-    const signup = searchParams.get('signup');
-    if (signup === 'true') {
-      setIsLogin(false);
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const signup = urlParams.get('signup');
+      if (signup === 'true') {
+        setIsLogin(false);
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
