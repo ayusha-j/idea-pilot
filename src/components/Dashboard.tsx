@@ -341,16 +341,7 @@ export default function Dashboard() {
           >
             Community Chat
           </button>
-          <button
-            onClick={() => switchTab('private')}
-            className={`w-full text-left p-3 rounded-md transition-colors font-source ${
-              activeTab === 'private'
-                ? 'bg-accent-pink text-dark-text'
-                : 'hover:bg-dark-element text-dark-text'
-            }`}
-          >
-            Private Messages
-          </button>
+          
         </nav>
       </div>
       
