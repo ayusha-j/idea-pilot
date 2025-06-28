@@ -4,18 +4,6 @@
 import { useState, useEffect } from 'react';
 import { SaveProjectButton } from '@/components/SaveProjectButton';
 
-// Add type declaration for window.confetti
-declare global {
-  interface Window {
-    confetti: (options: {
-      particleCount: number;
-      spread: number;
-      origin: { y: number };
-      [key: string]: unknown;
-    }) => void;
-  }
-}
-
 // Define types for the project structure
 interface CodeSnippet {
   milestoneIndex: number;
@@ -105,15 +93,6 @@ export default function ProjectCard({
       // Save to localStorage
       if (project?.title) {
         localStorage.setItem(`milestone_${project.title}_${index}`, 'completed');
-      }
-      
-      // Trigger confetti
-      if (typeof window !== 'undefined' && window.confetti) {
-        window.confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
       }
     }
   };

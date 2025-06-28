@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     console.log(`Getting chat history for user: ${userId}, project: ${projectId}`);
     
     // Use environment variable for backend URL
-    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://00fd-136-232-6-66.ngrok-free.app/api';
     const apiUrl = `${BACKEND_URL}/mentor-chat/history?userId=${userId}&projectId=${projectId}`;
     
     console.log(`Forwarding history request to: ${apiUrl}`);

@@ -14,18 +14,6 @@ import { useChatContext } from '@/app/contexts/ChatContext';
 import toast from 'react-hot-toast';
 import SupabaseDiagnostic from './SupabaseDiagnostic';
 
-// Define types
-declare global {
-  interface Window {
-    confetti: (options: {
-      particleCount: number;
-      spread: number;
-      origin: { y: number };
-      [key: string]: unknown;
-    }) => void;
-  }
-}
-
 // Project response types
 interface Milestone {
   task: string;
@@ -251,15 +239,6 @@ export default function Dashboard() {
       // Success handling
       toast.success('Project saved successfully!');
       
-      // Confetti animation
-      if (typeof window !== 'undefined' && window.confetti) {
-        window.confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      }
-      
       // Refresh saved projects if on saved tab
       if (activeTab === 'saved') {
         await loadSavedProjects(user.id);
@@ -341,16 +320,7 @@ export default function Dashboard() {
           >
             Community Chat
           </button>
-          <button
-            onClick={() => switchTab('private')}
-            className={`w-full text-left p-3 rounded-md transition-colors font-source ${
-              activeTab === 'private'
-                ? 'bg-accent-pink text-dark-text'
-                : 'hover:bg-dark-element text-dark-text'
-            }`}
-          >
-            Private Messages
-          </button>
+          
         </nav>
       </div>
       

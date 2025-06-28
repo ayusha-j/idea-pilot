@@ -1,9 +1,8 @@
-// src/components/LoginPage.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn, signUp, AuthResponse } from '@/lib/supabase';
-import { useRouter } from 'next/navigation'; // Changed from 'next/router'
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
@@ -37,7 +36,7 @@ export default function LoginPage() {
         if (!response.data.session && !isLogin) {
           setError('Please check your email to confirm your account before logging in');
         } else {
-          router.push('/dashboard'); // Changed from router.replace
+          router.push('/dashboard');
         }
       }
     } catch (err: unknown) {

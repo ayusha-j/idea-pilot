@@ -55,7 +55,7 @@ export default function HomePage() {
               Log In
             </Link>
             <Link
-              href="/login?signup=true"
+              href="/login"
               className="px-4 py-2 bg-primary-purple text-dark-text rounded-md hover:bg-accent-pink transition-colors font-cabin"
             >
               Sign Up
@@ -76,7 +76,7 @@ export default function HomePage() {
                 IdeaPilot AI helps students, career switchers, and hobbyists apply new concepts through hands-on projects with structured roadmaps and real-time AI mentoring.
               </p>
               <Link
-                href="/login?signup=true"
+                href="/login"
                 className="inline-block px-8 py-4 bg-accent-pink text-dark-text rounded-md font-cabin font-bold text-lg hover:scale-105 transition-all duration-200 hover:bg-primary-purple"
               >
                 Get Started Free
@@ -185,7 +185,7 @@ export default function HomePage() {
               Log In
             </Link>
             <Link
-              href="/login?signup=true"
+              href="/login"
               className="px-8 py-4 bg-accent-pink text-dark-text rounded-md font-cabin font-bold hover:scale-105 transition-all duration-200 hover:bg-primary-purple"
             >
               Create Free Account

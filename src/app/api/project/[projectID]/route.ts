@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import https from 'https';
 
 // The actual backend URL with IP address
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://00fd-136-232-6-66.ngrok-free.app';
 
 // Create a custom HTTPS agent that ignores SSL certificate errors
 const httpsAgent = new https.Agent({
