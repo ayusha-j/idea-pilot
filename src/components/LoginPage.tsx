@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { signIn, signUp, AuthResponse } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { setIsNewUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -24,9 +26,13 @@ export default function LoginPage() {
       if (isLogin) {
         // Handle login
         response = await signIn(email, password);
+        // For login, user is not new
+        setIsNewUser(false);
       } else {
         // Handle sign up
         response = await signUp(email, password, fullName);
+        // For signup, mark as new user
+        setIsNewUser(true);
       }
       
       if (response.error) {

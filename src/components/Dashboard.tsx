@@ -12,7 +12,7 @@ import QuickStartGuide from '@/components/QuickStartGuide';
 import { SavedProject } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { useChatContext } from '@/app/contexts/ChatContext';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 import SupabaseDiagnostic from './SupabaseDiagnostic';
 
@@ -75,12 +75,12 @@ export default function Dashboard() {
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [lastExperienceLevel, setLastExperienceLevel] = useState<number>(2);
   
-  // Quick Start Guide state
-  const [hasSeenQuickStart, setHasSeenQuickStart] = useLocalStorage('hasSeenQuickStart', false);
+  // Quick Start Guide state - only show for new users
   const [showQuickStart, setShowQuickStart] = useState<boolean>(false);
   
   // Hooks
   const router = useRouter();
+  const { isNewUser, setIsNewUser } = useAuth();
   
   // Removing unused variables from useChatContext
   const { /* userId, projectIds, setProjectId */ } = useChatContext();
@@ -112,9 +112,9 @@ export default function Dashboard() {
     checkAuthentication();
   }, [router, activeTab]);
 
-  // Show Quick Start Guide for new users
+  // Show Quick Start Guide only for new users (after signup)
   useEffect(() => {
-    if (!loading && user && !hasSeenQuickStart) {
+    if (!loading && user && isNewUser) {
       // Small delay to let the dashboard load first
       const timer = setTimeout(() => {
         setShowQuickStart(true);
@@ -122,7 +122,7 @@ export default function Dashboard() {
       
       return () => clearTimeout(timer);
     }
-  }, [loading, user, hasSeenQuickStart]);
+  }, [loading, user, isNewUser]);
   
   // Load user's saved projects from the new API endpoint
   const loadSavedProjects = async (userId: string): Promise<void> => {
@@ -292,7 +292,7 @@ export default function Dashboard() {
   // Handle Quick Start Guide close
   const handleQuickStartClose = (): void => {
     setShowQuickStart(false);
-    setHasSeenQuickStart(true);
+    setIsNewUser(false); // Mark user as no longer new
   };
   
   // Render loading spinner
@@ -391,7 +391,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Start Button */}
+      {/* Quick Start Button - Always available for manual access */}
       <div className="bg-dark-card rounded-lg shadow-md border border-dark-border overflow-hidden mt-4">
         <div className="p-4">
           <button
@@ -609,7 +609,7 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* Quick Start Guide */}
+      {/* Quick Start Guide - Only show for new users */}
       {showQuickStart && (
         <QuickStartGuide onClose={handleQuickStartClose} />
       )}
