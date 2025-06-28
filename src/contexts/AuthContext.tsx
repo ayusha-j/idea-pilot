@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  isNewUser: boolean; // Add flag for new users
+  isNewUser: boolean; // Flag for new users who just signed up
   setIsNewUser: (value: boolean) => void;
 }
 
@@ -35,15 +35,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Listen for auth changes
       const { data: authListener } = supabase.auth.onAuthStateChange(
         (event, session) => {
+          console.log('Auth event:', event);
           setUser(session?.user || null);
           setLoading(false);
           
-          // Check if this is a new signup
-          if (event === 'SIGNED_UP' || event === 'SIGNED_IN') {
-            // For signup, we'll set the flag
-            if (event === 'SIGNED_UP') {
+          // Only set isNewUser flag for actual signup events
+          if (event === 'SIGNED_UP') {
+            console.log('New user signed up, setting isNewUser to true');
+            setIsNewUser(true);
+            // Store in localStorage to persist across page reloads
+            localStorage.setItem('show_quick_start_guide', 'true');
+          } else if (event === 'SIGNED_IN') {
+            // Check if this is a new user from localStorage
+            const shouldShowGuide = localStorage.getItem('show_quick_start_guide') === 'true';
+            if (shouldShowGuide) {
               setIsNewUser(true);
             }
+          } else if (event === 'SIGNED_OUT') {
+            setIsNewUser(false);
+            localStorage.removeItem('show_quick_start_guide');
           }
         }
       );
@@ -60,10 +70,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
     setUser(null);
     setIsNewUser(false);
+    localStorage.removeItem('show_quick_start_guide');
+  };
+
+  const handleSetIsNewUser = (value: boolean) => {
+    setIsNewUser(value);
+    if (!value) {
+      // Remove the flag when guide is dismissed
+      localStorage.removeItem('show_quick_start_guide');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signOut, isNewUser, setIsNewUser }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      signOut, 
+      isNewUser, 
+      setIsNewUser: handleSetIsNewUser 
+    }}>
       {children}
     </AuthContext.Provider>
   );
