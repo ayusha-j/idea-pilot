@@ -25,8 +25,7 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
-      agent: httpsAgent
+      body: JSON.stringify(body)
     });
 
     console.log('Backend response status:', backendResponse.status);
