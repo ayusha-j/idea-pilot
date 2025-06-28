@@ -555,7 +555,7 @@ export default function Dashboard() {
             >
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
             </svg>
-            <h1 className="text-2xl font-bold font-cabin">Idea Pilot</h1>
+            <h1 className="text-2xl font-bold font-cabin">IdeaPilot AI</h1>
           </div>
           
           {user && (
