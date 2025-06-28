@@ -60,3 +60,32 @@ export interface SavedProject {
   created_at: string;
   updated_at: string;
 }
+
+// New types for domain mismatch handling
+export interface DomainMismatchData {
+  error: string;
+  message: string;
+  detectedKeywords: string[];
+  suggestedDomain: string;
+  suggestions: string[];
+  validation: {
+    confidence: string;
+    detected_keywords: string[];
+    is_valid: boolean;
+    message: string;
+    reason: string;
+    suggested_domain: string;
+    suggestions: string[];
+  };
+}
+
+export interface ProjectFormData {
+  conceptText: string;
+  experienceLevel: number;
+  domain: string;
+}
+
+export interface GeneratedProject {
+  project: ProjectDetails;
+  chatResponse: ChatResponse;
+}
