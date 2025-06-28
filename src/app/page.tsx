@@ -28,7 +28,7 @@ export default function HomePage() {
             >
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
             </svg>
-            <h1 className="text-2xl font-bold text-dark-text font-cabin">IdeaPilot AI</h1>
+            <h1 className="text-2xl font-bold text-dark-text font-cabin">Idea Pilot</h1>
           </div>
           
           <div className="space-x-4">
@@ -99,3 +99,4 @@ export default function HomePage() {
         </div>
       </section>
       
+   
