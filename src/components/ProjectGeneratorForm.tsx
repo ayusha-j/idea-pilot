@@ -7,7 +7,7 @@ import { generateProject } from '@/lib/api';
 
 // Define the props interface properly
 interface ProjectGeneratorFormProps {
-  onProjectGenerated: (projectData: ProjectResponse) => void;
+  onProjectGenerated: (projectData: ProjectResponse, experienceLevel: number) => void;
 }
 
 export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGeneratorFormProps) {
@@ -44,7 +44,7 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
       const projectData: ProjectResponse = await response.json();
       
       // Pass the data to parent component
-      onProjectGenerated(projectData);
+      onProjectGenerated(projectData, experienceLevel);
       
       // Trigger confetti on successful generation
       if (typeof window !== 'undefined' && window.confetti) {

@@ -83,6 +83,7 @@ export default function Dashboard() {
   const [generatedProject, setGeneratedProject] = useState<ProjectResponse | null>(null);
   const [savedProjects, setSavedProjects] = useState<ParsedSavedProject[]>([]);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+  const [lastExperienceLevel, setLastExperienceLevel] = useState<number>(2);
   
   // Hooks
   const router = useRouter();
@@ -175,8 +176,16 @@ export default function Dashboard() {
   };
   
   // Handle project generation callback
-  const handleProjectGenerated = (response: ProjectResponse): void => {
-    setGeneratedProject(response);
+  const handleProjectGenerated = (response: ProjectResponse, experienceLevel: number): void => {
+    let difficulty: 'Beginner' | 'Intermediate' | 'Advanced' = 'Intermediate';
+    if (experienceLevel === 1) difficulty = 'Beginner';
+    else if (experienceLevel === 2) difficulty = 'Intermediate';
+    else if (experienceLevel === 3) difficulty = 'Advanced';
+    const fixedProject = {
+      ...response.project,
+      difficulty,
+    };
+    setGeneratedProject({ ...response, project: fixedProject });
     setIsChatOpen(true);
     toast.success('Project generated successfully!');
   };

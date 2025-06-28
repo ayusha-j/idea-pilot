@@ -339,12 +339,6 @@ export default function ProjectCard({
           Regenerate Idea
         </button>
         <button
-          onClick={onSave}
-          className="px-4 py-2 bg-secondary-green text-dark-text rounded-md font-cabin transition-all duration-200 hover:scale-105 flex-1"
-        >
-          Save Project
-        </button>
-        <button
           onClick={downloadResourcePack}
           className="px-4 py-2 bg-secondary-orange text-dark-text rounded-md font-cabin transition-all duration-200 hover:scale-105 hover:bg-accent-yellow flex-1"
           disabled={!project.resourcePack?.markdownContent}
