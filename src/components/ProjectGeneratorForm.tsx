@@ -24,7 +24,7 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
   const [domainMismatchData, setDomainMismatchData] = useState<DomainMismatchData | null>(null);
   
   // Updated project generation function
-  const generateProject = async (data: ProjectFormData = formData, force: boolean = false) => {
+  const generateProject = async (data: ProjectFormData = formData) => {
     setIsSubmitting(true);
     
     try {
@@ -37,8 +37,7 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
         body: JSON.stringify({
           conceptText: data.conceptText,
           experienceLevel: data.experienceLevel,
-          domain: data.domain,
-          force: force // Add force parameter to bypass domain validation
+          domain: data.domain
         }),
       });
       
@@ -46,7 +45,7 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
       
       if (!response.ok) {
         // Check if it's a concept-domain mismatch (feature, not error)
-        if (responseData.error === 'concept_domain_mismatch' && !force) {
+        if (responseData.error === 'concept_domain_mismatch') {
           setShowDomainMismatch(true);
           setDomainMismatchData(responseData);
           return;
@@ -88,13 +87,6 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
     
     // Auto-regenerate with new domain
     generateProject(updatedFormData);
-  };
-
-  // Handler for proceeding anyway
-  const handleProceedAnyway = () => {
-    setShowDomainMismatch(false);
-    // Force generation despite mismatch
-    generateProject(formData, true);
   };
 
   // Handler for modifying concept
@@ -199,7 +191,6 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
         <DomainMismatchModal
           data={domainMismatchData}
           onSwitchDomain={handleSwitchDomain}
-          onProceedAnyway={handleProceedAnyway}
           onModifyConcept={handleModifyConcept}
           onClose={handleCloseMismatch}
         />

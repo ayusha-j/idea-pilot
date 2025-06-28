@@ -6,7 +6,6 @@ import { DomainMismatchData } from '@/types/project';
 interface DomainMismatchModalProps {
   data: DomainMismatchData;
   onSwitchDomain: (domain: string) => void;
-  onProceedAnyway: () => void;
   onModifyConcept: () => void;
   onClose: () => void;
 }
@@ -14,7 +13,6 @@ interface DomainMismatchModalProps {
 const DomainMismatchModal: React.FC<DomainMismatchModalProps> = ({
   data,
   onSwitchDomain,
-  onProceedAnyway,
   onModifyConcept,
   onClose
 }) => {
@@ -92,16 +90,6 @@ const DomainMismatchModal: React.FC<DomainMismatchModalProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Switch to {data.suggestedDomain}
-            </button>
-            
-            <button
-              onClick={onProceedAnyway}
-              className="w-full flex items-center justify-center gap-2 bg-dark-element hover:bg-dark-border text-dark-text font-medium py-3 px-4 rounded-lg transition-colors font-cabin"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.01M15 10h1.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Continue with current domain
             </button>
             
             <button
