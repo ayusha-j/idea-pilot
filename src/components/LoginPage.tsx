@@ -66,7 +66,7 @@ export default function LoginPage() {
           </h1>
           <p className="mt-2 text-dark-text-secondary">
             {isLogin 
-              ? 'Welcome back to Idea Pilot'
+              ? 'Welcome back to IdeaPilot'
               : 'Start your journey with Idea Pilot'}
           </p>
         </div>
