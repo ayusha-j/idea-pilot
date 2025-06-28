@@ -82,7 +82,7 @@ export default function QuickStartGuide({ onClose }: QuickStartGuideProps) {
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-dark-text font-cabin">Welcome to Idea Pilot!</h2>
+              <h2 className="text-xl font-bold text-dark-text font-cabin">Welcome to IdeaPilot AI!</h2>
               <p className="text-sm text-dark-text-secondary font-source">Let's get you started</p>
             </div>
           </div>
