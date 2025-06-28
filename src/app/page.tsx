@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '@/lib/supabase';
 
 export default function HomePage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   // Ensure we're on the client side before using router
   useEffect(() => {
@@ -28,14 +28,16 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Error checking authentication:', error);
+      } finally {
+        setIsCheckingAuth(false);
       }
     };
     
     checkAuth();
   }, [router, isClient]);
   
-  // Show loading state until client-side hydration is complete
-  if (!isClient) {
+  // Show loading state until client-side hydration is complete and auth check is done
+  if (!isClient || isCheckingAuth) {
     return (
       <div className="min-h-screen bg-dark-bg flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-purple"></div>
@@ -65,18 +67,18 @@ export default function HomePage() {
           </div>
           
           <div className="space-x-4">
-            <Link
-              href="/login"
+            <button
+              onClick={() => router.push('/login')}
               className="px-4 py-2 bg-dark-element text-dark-text rounded-md hover:bg-dark-border transition-colors font-cabin"
             >
               Log In
-            </Link>
-            <Link
-              href="/login"
+            </button>
+            <button
+              onClick={() => router.push('/login')}
               className="px-4 py-2 bg-primary-purple text-dark-text rounded-md hover:bg-accent-pink transition-colors font-cabin"
             >
               Sign Up
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -92,12 +94,12 @@ export default function HomePage() {
               <p className="text-dark-text-secondary font-source text-lg mb-8">
                 Idea Pilot helps students, career switchers, and hobbyists apply new concepts through hands-on projects with structured roadmaps and real-time AI mentoring.
               </p>
-              <Link
-                href="/login"
+              <button
+                onClick={() => router.push('/login')}
                 className="inline-block px-8 py-4 bg-accent-pink text-dark-text rounded-md font-cabin font-bold text-lg hover:scale-105 transition-all duration-200 hover:bg-primary-purple"
               >
                 Get Started Free
-              </Link>
+              </button>
             </div>
             
             <div className="md:w-1/2">
@@ -195,18 +197,18 @@ export default function HomePage() {
             Join thousands of learners who are turning concepts into real projects with Idea Pilot.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/login"
+            <button
+              onClick={() => router.push('/login')}
               className="px-8 py-4 bg-dark-element text-dark-text rounded-md font-cabin font-bold hover:bg-dark-border transition-colors"
             >
               Log In
-            </Link>
-            <Link
-              href="/login"
+            </button>
+            <button
+              onClick={() => router.push('/login')}
               className="px-8 py-4 bg-accent-pink text-dark-text rounded-md font-cabin font-bold hover:scale-105 transition-all duration-200 hover:bg-primary-purple"
             >
               Create Free Account
-            </Link>
+            </button>
           </div>
         </div>
       </section>

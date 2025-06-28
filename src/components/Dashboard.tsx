@@ -14,7 +14,6 @@ import { User } from '@supabase/supabase-js';
 import { useChatContext } from '@/app/contexts/ChatContext';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
-import SupabaseDiagnostic from './SupabaseDiagnostic';
 
 // Project response types
 interface Milestone {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { signIn, signUp, AuthResponse } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,8 +31,8 @@ export default function LoginPage() {
       } else {
         // Handle sign up
         response = await signUp(email, password, fullName);
-        // For signup, mark as new user
-        setIsNewUser(true);
+        // For signup, mark as new user - this will be handled by the auth state change
+        console.log('Signup response:', response);
       }
       
       if (response.error) {
@@ -42,6 +42,7 @@ export default function LoginPage() {
         if (!response.data.session && !isLogin) {
           setError('Please check your email to confirm your account before logging in');
         } else {
+          // Successful login/signup with session
           router.push('/dashboard');
         }
       }
