@@ -63,7 +63,7 @@ export default function HomePage() {
             >
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
             </svg>
-            <h1 className="text-2xl font-bold text-dark-text font-cabin">Idea Pilot</h1>
+            <h1 className="text-2xl font-bold text-dark-text font-cabin">IdeaPilot AI</h1>
           </div>
           
           <div className="space-x-4">
@@ -92,7 +92,7 @@ export default function HomePage() {
                 Generate Personalized Projects with <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-purple to-primary-blue">AI Mentorship</span>
               </h2>
               <p className="text-dark-text-secondary font-source text-lg mb-8">
-                Idea Pilot helps students, career switchers, and hobbyists apply new concepts through hands-on projects with structured roadmaps and real-time AI mentoring.
+                IdeaPilot AI helps students, career switchers, and hobbyists apply new concepts through hands-on projects with structured roadmaps and real-time AI mentoring.
               </p>
               <button
                 onClick={() => router.push('/login')}
@@ -138,7 +138,7 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-dark-card">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl font-bold text-dark-text font-cabin mb-12 text-center">
-            How Idea Pilot Works
+            How IdeaPilot AI Works
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
