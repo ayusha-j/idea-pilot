@@ -1,4 +1,3 @@
-// src/components/LoginPage.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,17 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
-  // Check URL for signup parameter on client side
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const signup = urlParams.get('signup');
-      if (signup === 'true') {
-        setIsLogin(false);
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
