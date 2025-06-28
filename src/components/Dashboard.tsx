@@ -6,10 +6,13 @@ import { getCurrentUser, saveProject, getUserProjects, signOut } from '@/lib/sup
 import ProjectGeneratorForm from '@/components/ProjectGeneratorForm';
 import ProjectCard from '@/components/ProjectCard';
 import AIMentorChat from '@/components/AIMentorChat';
+import CommunityChat from '@/components/CommunityChat';
+import PrivateChat from '@/components/PrivateChat';
 import { SavedProject } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
-import { useChatContext } from '@/app/contexts/ChatContext'; // Fix the import path
+import { useChatContext } from '@/app/contexts/ChatContext';
 import toast from 'react-hot-toast';
+import SupabaseDiagnostic from './SupabaseDiagnostic';
 
 // Define types
 declare global {
@@ -18,7 +21,7 @@ declare global {
       particleCount: number;
       spread: number;
       origin: { y: number };
-      [key: string]: unknown; // Changed from 'any' to 'unknown'
+      [key: string]: unknown;
     }) => void;
   }
 }
@@ -76,7 +79,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [regenerating, setRegenerating] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'generator' | 'saved' | 'community'>('generator');
+  const [activeTab, setActiveTab] = useState<'generator' | 'saved' | 'community' | 'private'>('generator');
   const [generatedProject, setGeneratedProject] = useState<ProjectResponse | null>(null);
   const [savedProjects, setSavedProjects] = useState<ParsedSavedProject[]>([]);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
@@ -272,7 +275,7 @@ export default function Dashboard() {
   };
   
   // Change active tab
-  const switchTab = (tab: 'generator' | 'saved' | 'community'): void => {
+  const switchTab = (tab: 'generator' | 'saved' | 'community' | 'private'): void => {
     setActiveTab(tab);
     
     if (tab === 'saved' && user) {
@@ -321,13 +324,23 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => switchTab('community')}
-            className={`w-full text-left p-3 rounded-md transition-colors font-source ${
+            className={`w-full text-left p-3 rounded-md mb-2 transition-colors font-source ${
               activeTab === 'community'
                 ? 'bg-accent-pink text-dark-text'
                 : 'hover:bg-dark-element text-dark-text'
             }`}
           >
             Community Chat
+          </button>
+          <button
+            onClick={() => switchTab('private')}
+            className={`w-full text-left p-3 rounded-md transition-colors font-source ${
+              activeTab === 'private'
+                ? 'bg-accent-pink text-dark-text'
+                : 'hover:bg-dark-element text-dark-text'
+            }`}
+          >
+            Private Messages
           </button>
         </nav>
       </div>
@@ -446,17 +459,19 @@ export default function Dashboard() {
     );
   };
   
-  // Render the community tab content
+  // Render the community chat tab content
   const renderCommunityTab = () => (
     <div>
       <h2 className="text-2xl font-bold text-dark-text mb-6 font-cabin">Community Chat</h2>
-      <div className="bg-dark-card rounded-lg shadow-md border border-dark-border p-4">
-        <p className="text-center text-dark-text font-source py-8">
-          Community chat feature will be implemented here, allowing users to share projects,
-          ask questions, and collaborate with others. This will use Supabase Realtime for
-          real-time chat functionality.
-        </p>
-      </div>
+      <CommunityChat />
+    </div>
+  );
+  
+  // Render the private chat tab content
+  const renderPrivateChatTab = () => (
+    <div>
+      <h2 className="text-2xl font-bold text-dark-text mb-6 font-cabin">Private Messages</h2>
+      <PrivateChat />
     </div>
   );
   
@@ -563,7 +578,8 @@ export default function Dashboard() {
             <div className="flex-1">
               {activeTab === 'generator' && renderGeneratorTab()}
               {activeTab === 'saved' && renderSavedProjectsTab()}
-              {activeTab === 'community' && renderCommunityTab()}
+              {activeTab === 'community' && renderCommunityTab() }
+              {activeTab === 'private' && renderPrivateChatTab()}
             </div>
             
             {/* Chat interface */}

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     console.log(`Clearing chat history for user: ${body.userId}, project: ${body.projectId}`);
     
     // Use environment variable for backend URL
-    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://226e-182-48-218-95.ngrok-free.app/api';
+    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const apiUrl = `${BACKEND_URL}/mentor-chat/clear`;
     
     console.log(`Forwarding clear request to: ${apiUrl}`);

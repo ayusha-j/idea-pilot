@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     console.log('Request body:', body);
 
     // Use the current ngrok URL with the correct /api prefix
-    const BACKEND_URL = 'https://226e-182-48-218-95.ngrok-free.app';
+    const BACKEND_URL = 'http://localhost:5000';
     const apiUrl = `${BACKEND_URL}/api/save-project`; // Add /api here
     console.log(`Forwarding request to ${apiUrl}`);
     

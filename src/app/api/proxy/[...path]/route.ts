@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // The actual backend URL with IP address
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://226e-182-48-218-95.ngrok-free.app/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 // Note: The type definitions for route handlers changed in Next.js 15
 // The params type needs to match exactly what Next.js expects
