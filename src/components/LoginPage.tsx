@@ -1,9 +1,9 @@
 // src/components/LoginPage.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn, signUp, AuthResponse } from '@/lib/supabase';
-import { useRouter } from 'next/navigation'; // Changed from 'next/router'
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
@@ -13,6 +13,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Check if signup parameter is present
+  useEffect(() => {
+    const signup = searchParams.get('signup');
+    if (signup === 'true') {
+      setIsLogin(false);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -37,7 +46,7 @@ export default function LoginPage() {
         if (!response.data.session && !isLogin) {
           setError('Please check your email to confirm your account before logging in');
         } else {
-          router.push('/dashboard'); // Changed from router.replace
+          router.push('/dashboard');
         }
       }
     } catch (err: unknown) {
