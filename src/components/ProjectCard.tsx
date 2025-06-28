@@ -231,7 +231,7 @@ export default function ProjectCard({
               <div key={index} className="mb-6 relative">
                 {/* Timeline dot */}
                 <div
-                  className={`absolute w-4 h-4 rounded-full bg-primary-purple -left-[9px] top-0 border-2 border-dark-card ${
+                  className={`absolute w-4 h-4 rounded-full bg-primary-purple -left-[41px] top-1/2 -translate-y-1/2 border-2 border-dark-card ${
                     completedMilestones.includes(index) ? 'bg-secondary-green' : ''
                   }`}
                 ></div>
@@ -241,7 +241,7 @@ export default function ProjectCard({
                   className="flex items-center cursor-pointer"
                   onClick={() => toggleMilestone(index)}
                 >
-                  <h5 className="text-dark-text font-cabin font-medium">{milestone.task || "Unnamed Task"}</h5>
+                  <h5 className="text-dark-text ml-3 font-cabin font-medium">{milestone.task || "Unnamed Task"}</h5>
                   <span className="ml-2 text-xs text-dark-text-secondary">({milestone.estimatedTime || "N/A"})</span>
                   <button
                     className={`ml-auto text-xs px-2 py-1 rounded ${
