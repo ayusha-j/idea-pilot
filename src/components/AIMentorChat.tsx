@@ -230,13 +230,29 @@ export default function AIMentorChat({
       console.log('Sending mentor message with project context:', {
         projectTitle: projectContext?.title,
         projectDescription: projectContext?.description,
-        messageText: messageText
+        messageText: messageText,
+        hasFullContext: !!projectContext
       });
+      
+      // Ensure we have a complete project context
+      const fullProjectContext = {
+        title: projectContext?.title || '',
+        description: projectContext?.description || '',
+        difficulty: projectContext?.difficulty || 'Intermediate',
+        domain: projectContext?.domain || '',
+        vibe: projectContext?.vibe || '',
+        milestones: projectContext?.milestones || [],
+        tools: projectContext?.tools || [],
+        codeSnippets: projectContext?.codeSnippets || [],
+        resourcePack: projectContext?.resourcePack || { links: [], wildcardLink: '', markdownContent: '' }
+      };
+      
+      console.log('Full project context being sent:', fullProjectContext);
       
       // Call API with current context - ensure we're passing the full project context
       const response = await sendMentorMessage(
         messageText,
-        projectContext, // This should contain the full project details
+        fullProjectContext, // This should contain the full project details
         messages,
         userId,
         projectId
@@ -269,18 +285,26 @@ export default function AIMentorChat({
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
       console.error('Error getting AI response:', error);
-      toast.error('Failed to get AI response. Please try again.');
+      
+      // Show more helpful error messages
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('ngrok') || errorMessage.includes('Backend server')) {
+        toast.error('Backend connection error. Please check that your Flask server is running and ngrok URL is updated.');
+      } else {
+        toast.error('Failed to get AI response. Please try again.');
+      }
       
       // Add error message
-      const errorMessage: ChatMessage = {
+      const errorMessage2: ChatMessage = {
         id: messages.length + 2,
         role: 'ai',
         sender: 'ai',
-        text: "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
+        text: "Sorry, I'm having trouble connecting to the backend right now. Please check that the Flask server is running and the ngrok URL is current.",
         timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorMessage2]);
     } finally {
       setIsLoading(false);
     }
