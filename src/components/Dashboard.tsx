@@ -182,15 +182,27 @@ export default function Dashboard() {
   
   // Handle project generation callback
   const handleProjectGenerated = (response: ProjectResponse, experienceLevel: number): void => {
+    console.log('Dashboard: Project generated:', {
+      hasProject: !!response.project,
+      projectTitle: response.project?.title,
+      projectDescription: response.project?.description,
+      hasChatResponse: !!response.chatResponse
+    });
+    
     let difficulty: 'Beginner' | 'Intermediate' | 'Advanced' = 'Intermediate';
     if (experienceLevel === 1) difficulty = 'Beginner';
     else if (experienceLevel === 2) difficulty = 'Intermediate';
     else if (experienceLevel === 3) difficulty = 'Advanced';
+    
     const fixedProject = {
       ...response.project,
       difficulty,
     };
-    setGeneratedProject({ ...response, project: fixedProject });
+    
+    const projectResponse = { ...response, project: fixedProject };
+    console.log('Dashboard: Setting generated project with full context:', projectResponse);
+    
+    setGeneratedProject(projectResponse);
     setIsChatOpen(true);
     toast.success('Project generated successfully!');
   };
@@ -495,6 +507,12 @@ export default function Dashboard() {
   // Render the AI mentor chat
   const renderAIMentorChat = () => {
     if (!generatedProject) return null;
+    
+    console.log('Dashboard: Rendering AI mentor chat with project:', {
+      hasProject: !!generatedProject.project,
+      projectTitle: generatedProject.project?.title,
+      projectDescription: generatedProject.project?.description
+    });
     
     return (
       <div className={`fixed bottom-0 right-4 w-96 transition-all duration-300 shadow-lg z-10 ${

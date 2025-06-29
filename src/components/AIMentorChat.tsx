@@ -78,6 +78,20 @@ export default function AIMentorChat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Debug: Log project context when component mounts or updates
+  useEffect(() => {
+    console.log('AIMentorChat: Project context received:', {
+      hasProjectContext: !!projectContext,
+      title: projectContext?.title,
+      description: projectContext?.description,
+      difficulty: projectContext?.difficulty,
+      domain: projectContext?.domain,
+      milestonesCount: projectContext?.milestones?.length || 0,
+      toolsCount: projectContext?.tools?.length || 0,
+      hasResourcePack: !!projectContext?.resourcePack
+    });
+  }, [projectContext]);
+
   // Create default greeting message using useCallback to avoid dependency issues
   const createDefaultGreeting = useCallback(() => {
     const projectTitle = projectContext?.title || 'your project';
@@ -234,7 +248,7 @@ export default function AIMentorChat({
         hasFullContext: !!projectContext
       });
       
-      // Ensure we have a complete project context
+      // Ensure we have a complete project context - this is the key fix
       const fullProjectContext = {
         title: projectContext?.title || '',
         description: projectContext?.description || '',
