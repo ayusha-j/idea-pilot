@@ -66,14 +66,14 @@ export const QuickNoteButton: React.FC<QuickNoteButtonProps> = ({
       </button>
 
       {showNoteInput && (
-        <div className="absolute top-full left-0 mt-2 w-80 bg-dark-card border border-dark-border rounded-lg shadow-lg p-4 z-50">
+        <div className="absolute top-full right-0 mt-2 w-80 bg-dark-card border border-dark-border rounded-lg shadow-lg p-4 z-50">
           <h4 className="font-medium text-dark-text mb-2 font-cabin">Add Note</h4>
           <textarea
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Write your note here..."
-            className="w-full p-3 bg-dark-element border border-dark-border rounded-lg text-dark-text resize-none h-24 font-source"
+            className="w-full p-3 bg-dark-element border border-dark-border rounded-lg text-dark-text resize-none h-24 font-source focus:outline-none focus:ring-2 focus:ring-primary-purple"
             autoFocus
           />
           <div className="flex items-center justify-between mt-3">

@@ -427,15 +427,6 @@ export default function ProjectCard({
                   <h5 className="text-dark-text ml-3 font-cabin font-medium flex-1">{milestone.task || "Unnamed Task"}</h5>
                   <span className="ml-2 text-xs text-dark-text-secondary">({milestone.estimatedTime || "N/A"})</span>
                   <div className="flex items-center gap-1 ml-2">
-                    <BookmarkButton
-                      projectId={projectId}
-                      projectTitle={project.title}
-                      type="milestone"
-                      targetId={index.toString()}
-                      title={milestone.task || `Milestone ${index + 1}`}
-                      description={milestone.description}
-                      className="p-1"
-                    />
                     <QuickNoteButton
                       projectId={projectId}
                       projectTitle={project.title}
