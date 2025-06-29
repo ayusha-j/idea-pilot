@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // The backend URL from environment variable
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://413a-136-232-6-66.ngrok-free.app';
 
 export async function POST(request: Request) {
   try {
