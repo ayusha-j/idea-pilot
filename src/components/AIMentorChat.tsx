@@ -80,21 +80,33 @@ export default function AIMentorChat({
 
   // Create default greeting message using useCallback to avoid dependency issues
   const createDefaultGreeting = useCallback(() => {
+    const projectTitle = projectContext?.title || 'your project';
+    const projectDescription = projectContext?.description || '';
+    
+    let contextualGreeting = `Hi there! I'm your AI project mentor for "${projectTitle}".`;
+    
+    if (projectDescription) {
+      contextualGreeting += ` I understand you're working on: ${projectDescription}`;
+    }
+    
+    contextualGreeting += ` I'm here to help you with any questions about your project. What would you like to know?`;
+    
     setMessages([
       {
         id: 1,
         role: 'ai',
         sender: 'ai',
-        text: `Hi there! I'm your AI project mentor for "${projectContext?.title || 'your project'}". How can I help you today?`,
+        text: contextualGreeting,
         timestamp: new Date(),
         followUpQuestions: [
-          "Need help getting started?",
-          "Want to understand the project better?",
-          "Looking for specific resources?"
+          "How do I get started with this project?",
+          "What are the key challenges I should expect?",
+          "Can you explain the technical requirements?",
+          "What resources do you recommend?"
         ]
       }
     ]);
-  }, [projectContext?.title]);
+  }, [projectContext?.title, projectContext?.description]);
 
   // Initialize with the provided initial message if available
   useEffect(() => {
@@ -215,14 +227,22 @@ export default function AIMentorChat({
     setIsLoading(true);
     
     try {
-      // Call API with current context
+      console.log('Sending mentor message with project context:', {
+        projectTitle: projectContext?.title,
+        projectDescription: projectContext?.description,
+        messageText: messageText
+      });
+      
+      // Call API with current context - ensure we're passing the full project context
       const response = await sendMentorMessage(
         messageText,
-        projectContext,
+        projectContext, // This should contain the full project details
         messages,
         userId,
         projectId
       );
+      
+      console.log('Mentor response received:', response);
       
       // Store session IDs
       if (response.userId && response.userId !== userId) {
@@ -318,7 +338,7 @@ export default function AIMentorChat({
         <div>
           <h3 className="font-bold">AI Project Mentor</h3>
           <p className="text-sm text-dark-text-secondary">
-            Ask questions about your project and get personalized guidance
+            {projectContext?.title ? `Helping with: ${projectContext.title}` : 'Ask questions about your project and get personalized guidance'}
           </p>
         </div>
         <button
@@ -416,7 +436,7 @@ export default function AIMentorChat({
             type="text"
             value={newMessage}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)}
-            placeholder="Ask about your project..."
+            placeholder={`Ask about ${projectContext?.title || 'your project'}...`}
             className="flex-1 p-4 bg-dark-card border border-dark-border text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-primary-purple font-source"
             disabled={isLoading}
           />
