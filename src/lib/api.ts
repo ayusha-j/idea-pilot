@@ -41,29 +41,67 @@ export async function sendMentorMessage(
   userId?: string,
   projectId?: string
 ): Promise<{ chatResponse: ChatResponse; userId: string; projectId: string }> {
+  console.log('API: Sending mentor message with context:', {
+    message: message.substring(0, 50) + '...',
+    projectTitle: projectContext?.title,
+    projectDescription: projectContext?.description,
+    hasProjectContext: !!projectContext,
+    messageHistoryLength: messageHistory.length
+  });
+
+  const requestBody = {
+    message,
+    projectContext: {
+      title: projectContext?.title || '',
+      description: projectContext?.description || '',
+      difficulty: projectContext?.difficulty || 'Intermediate',
+      domain: projectContext?.domain || '',
+      vibe: projectContext?.vibe || '',
+      milestones: projectContext?.milestones || [],
+      tools: projectContext?.tools || [],
+      codeSnippets: projectContext?.codeSnippets || [],
+      resourcePack: projectContext?.resourcePack || { links: [], wildcardLink: '', markdownContent: '' }
+    },
+    messageHistory: messageHistory.map(m => ({
+      sender: m.sender,
+      text: m.text,
+      timestamp: m.timestamp?.toISOString() || new Date().toISOString()
+    })),
+    userId,
+    projectId,
+  };
+
+  console.log('API: Request body structure:', {
+    hasMessage: !!requestBody.message,
+    hasProjectContext: !!requestBody.projectContext,
+    projectTitle: requestBody.projectContext.title,
+    projectDescription: requestBody.projectContext.description,
+    messageHistoryLength: requestBody.messageHistory.length
+  });
+
   const response = await fetch(`${API_URL}/mentor-chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      message,
-      projectContext,
-      messageHistory: messageHistory.map(m => ({
-        sender: m.sender,
-        text: m.text
-      })),
-      userId,
-      projectId,
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
     const error = await response.json();
+    console.error('API: Mentor chat error response:', error);
     throw new Error(error.error || 'Failed to get response');
   }
 
-  return await response.json();
+  const result = await response.json();
+  console.log('API: Mentor chat success response:', {
+    hasResponse: !!result.chatResponse,
+    responseMessage: result.chatResponse?.message?.substring(0, 100) + '...',
+    userId: result.userId,
+    projectId: result.projectId
+  });
+
+  return result;
 }
 
 /**
