@@ -50,8 +50,13 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
           setDomainMismatchData(responseData);
           return;
         } else {
-          // Handle as actual error
-          throw new Error(responseData.error || 'Failed to generate project');
+          // Handle configuration errors with more helpful messages
+          if (response.status === 503 || response.status === 502) {
+            throw new Error(responseData.details || responseData.error || 'Backend server configuration error');
+          } else {
+            // Handle as actual error
+            throw new Error(responseData.error || 'Failed to generate project');
+          }
         }
       }
       
@@ -67,7 +72,15 @@ export default function ProjectGeneratorForm({ onProjectGenerated }: ProjectGene
       
     } catch (error) {
       console.error('Error generating project:', error);
-      alert('Failed to generate project. Please try again.');
+      
+      // Show more helpful error messages
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate project. Please try again.';
+      
+      if (errorMessage.includes('ngrok') || errorMessage.includes('Backend server')) {
+        alert(`Configuration Error: ${errorMessage}\n\nPlease check that:\n1. Your Flask backend server is running\n2. ngrok is active and tunneling to your backend\n3. Update NEXT_PUBLIC_API_URL in .env.local with the current ngrok URL\n4. Restart the development server after updating .env.local`);
+      } else {
+        alert(`Error: ${errorMessage}`);
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -7,6 +7,18 @@ export async function POST(request: Request) {
   try {
     console.log('API Route: Handling generate-project request');
     
+    // Check if backend URL is configured
+    if (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL.includes('your-current-ngrok-url')) {
+      console.error('API Route: Backend URL not properly configured');
+      return NextResponse.json(
+        { 
+          error: 'Backend server not configured. Please update NEXT_PUBLIC_API_URL in .env.local with your current ngrok URL.',
+          details: 'The backend API URL appears to be a placeholder or not set. Make sure your Flask server is running and ngrok is active.'
+        },
+        { status: 503 }
+      );
+    }
+    
     // Get the request body
     let body = {};
     try {
@@ -64,6 +76,20 @@ export async function POST(request: Request) {
     const responseText = await backendResponse.text();
     console.log('API Route: Response text preview:', responseText.substring(0, 200));
     
+    // Check if response looks like HTML (common when ngrok URL is wrong)
+    if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+      console.error('API Route: Received HTML instead of JSON - backend URL likely incorrect');
+      return NextResponse.json(
+        { 
+          error: 'Backend server returned HTML instead of JSON. This usually means the ngrok URL has expired or changed.',
+          details: 'Please check that your Flask server is running and update NEXT_PUBLIC_API_URL in .env.local with the current ngrok URL.',
+          backend_url: apiUrl,
+          response_preview: responseText.substring(0, 200)
+        },
+        { status: 502 }
+      );
+    }
+    
     // Try to parse as JSON
     let responseData;
     try {
@@ -78,7 +104,8 @@ export async function POST(request: Request) {
         { 
           error: 'Invalid JSON response from backend',
           details: responseText.substring(0, 500) + (responseText.length > 500 ? '...' : ''),
-          backend_status: backendResponse.status
+          backend_status: backendResponse.status,
+          backend_url: apiUrl
         },
         { status: 502 }
       );
@@ -122,7 +149,8 @@ export async function POST(request: Request) {
       { 
         error: 'Failed to connect to backend server',
         details: errorMessage,
-        stack: errorDetails
+        stack: errorDetails,
+        backend_url: BACKEND_URL
       },
       { status: 500 }
     );
